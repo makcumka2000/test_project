@@ -22,12 +22,9 @@
                 </form>
             </div>
             <div>
-            <?php 
-            if(isset($_POST))
-            {
-            require_once (__DIR__.'/db_data.php');
-            }
-            ?> 
+            <?php
+require_once (__DIR__."/sql.php");
+?> 
             </div>
             <footer>
                 <p>Это подвал тестовой страницы</p>
