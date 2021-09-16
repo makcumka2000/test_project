@@ -22,7 +22,6 @@ else{
         VALUES ( '$_POST[nick]' , '$_POST[name]' , '$_POST[email]' , '$_POST[data]' , '$b[id_City]'); " ;
         $result_sql_q4 = pg_query( $db_connect , $sql_q4 );
     }else {
-        //вставка данных в таблицу из формы
     $sql_q2 = "INSERT INTO \"User_info\" (\"Nick_name\",\"Full_name\", \"email\",\"Birthdate\", \"City\")
     VALUES ( '$_POST[nick]' , '$_POST[name]' , '$_POST[email]' , '$_POST[data]' , '$a[id_City]'); " ;
     $insert = pg_query( $db_connect , $sql_q2 );
