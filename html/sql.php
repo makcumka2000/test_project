@@ -13,7 +13,7 @@ try {
 } catch (PDOException $e){
     echo $e -> getMessage();
 }
-
+//функция на Select
 function _pgSelect ($s_Column, $table, $w_Columns, $condition, $pdo) {
     $sql = "SELECT $s_Column FROM $table WHERE $w_Columns LIKE '$condition' ;";
     $prep = $pdo -> prepare($sql) ;
@@ -26,7 +26,6 @@ function _pgSelect ($s_Column, $table, $w_Columns, $condition, $pdo) {
     $fetch =  $prep-> fetch (PDO::FETCH_ASSOC);
     return $fetch;
 }
-
 
 $querry = _pgSelect('id','cities', 'city', $_POST['city'],$dbc);
 
