@@ -24,7 +24,7 @@
             <div>
             <?php
 require_once (__DIR__."/sql.php");
-?> 
+            ?> 
             </div>
             <footer>
                 <p>Это подвал тестовой страницы</p>
