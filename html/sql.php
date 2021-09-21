@@ -1,4 +1,5 @@
 <?php
+ini_set('error_reporting',E_ALL);
 $host ='127.0.0.1' ;
 $port = '5432' ;
 $db_name = 'test';
@@ -11,40 +12,48 @@ $pdo_option = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
 try {
     $dbc = new PDO ($dsn, $user, $pass, $pdo_option );
 } catch (PDOException $e){
-    echo $e -> getMessage();
-}
+    echo $e -> getMessage ();
+    die;
+}  
 
+//функция Select
 function _pgSelect ($s_Column, $table, $w_Columns, $condition, $pdo) {
     $sql = "SELECT $s_Column FROM $table WHERE $w_Columns LIKE '$condition' ;";
-    $prep = $pdo -> prepare($sql) ;
-    $prep -> execute();
+    $prep = $pdo -> prepare ($sql) ;
     try {
-        $prep -> execute();
+        $prep -> execute ();
     } catch (Exception $e){
-        echo $e-> getMessage("Ошибка заполнения формы");
-    }
+        echo $e-> getMessage ();
+        die;
+    } 
     $fetch =  $prep-> fetch (PDO::FETCH_ASSOC);
     return $fetch;
 }
 
-
-$querry = _pgSelect('id','cities', 'city', $_POST['city'],$dbc);
-
-/* 
-    //проверка на существование города в бд, есди есть, то вытаскиваем id
-    $sql = "SELECT \"id\" FROM \"cities\" WHERE \"city\" = \"'$_POST[city]'\"";
-    $result = pg_query( $pgsql_connect , $sql );
-    $result_fetch = pg_fetch_array($result);
-    if(empty($result_fetch)){
-        //добавление в бд если города нет
-        $sql_q2 = "INSERT INTO \"cities\" (\"city\") VALUES ('$_POST[city]');";
-        $result_sql_q2= pg_query( $pgsql_connect , $sql_q2);
-        //вытаскиваем id который присвоили городу
-        $sql_q3 = "SELECT \"id_City\" FROM \"City_info\" WHERE \"City\" = '$_POST[city]'";
-        $result_sql_q3 = pg_query( $pgsql_connect , $sql_q3);
-        $b = pg_fetch_array($result_sql_q3);
+//функция INSERT
+function _pgInsert ($table, $values, $pdo){
+    $sql = "INSERT INTO $table VALUES ('$values')";
+    $prep = $pdo -> prepare ($sql);
+    try {
+        $prep -> execute ();
+    } catch (Exception $e){
+        echo $e-> getMessage ();
+        die;
     }
-    $sql_q4 = "INSERT INTO \"User_info\" (\"Nick_name\",\"Full_name\", \"email\",\"Birthdate\", \"City\")
-        VALUES ( '$_POST[nick]' , '$_POST[name]' , '$_POST[email]' , '$_POST[data]' , '$b[id_City]'); " ;
-        $result_sql_q4 = pg_query( $pgsql_connect , $sql_q4 );
-        pg_close($pgsql_connect); */
+}
+
+$querry = _pgSelect ('id','cities', 'city', $_POST['city'],$dbc);
+if (empty ($querry)){
+    $cityTable = "cities(city)";
+    $cityValues = $_POST['city'];
+    $newCity = _pgInsert ($cityTable, $cityValues, $dbc);
+    $querry = _pgSelect ('id','cities', 'city', $_POST['city'],$dbc);
+}
+$userTable = "users(full_name, nick_name, email, birthdate, city_id)";
+$userValues = "$_POST[name]','$_POST[nick]','$_POST[email]','$_POST[data]','$querry[id]";
+try {
+    $newUser = _pgInsert($userTable, $userValues, $dbc);
+}catch (Exception $e){
+    echo $e-> getMessage ();
+}
+$dbc=null;
