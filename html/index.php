@@ -12,7 +12,7 @@
                 <p>Это тело тестовой страницы</p>
             </div>
             <div>
-                <form name = "reg" method = "POST" > 
+                <form name = "reg" method = "POST" action="sql.php"> 
                     <p>Никнейм:<input type = "text" name = "nick"></P>
                     <p>ФИО:<input type = "text" name = "name"></P>
                     <p>email:<input type = "text" name = "email"></P>
@@ -20,11 +20,6 @@
                     <p>Город:<input type = "text" name = "city"></P>
                     <input type = submit value = "Готово" name = "done">
                 </form>
-            </div>
-            <div>
-            <?php
-require_once (__DIR__."/sql.php");
-            ?> 
             </div>
             <footer>
                 <p>Это подвал тестовой страницы</p>
