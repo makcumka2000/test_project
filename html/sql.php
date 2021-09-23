@@ -16,14 +16,14 @@ $pdo_option = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
 // подключение к базе
 try {
     $dbc = new PDO ($dsn, $user, $pass, $pdo_option );
-} catch (PDOException $e){
+} catch (Exception $e){
     echo $e -> getMessage ();
     die;
 }  
 
 //функция Select
 function _pgSelect (string $s_Column, string $i_Table, string $w_Column, $l_Condition, mixed $pdo) {
-    $sql = "SELECT $s_Column FROM $i_Table WHERE $w_Column LIKE ? ";
+    $sql = "SELECT $s_Column FROM $i_Table WHERE $w_Column = ? ";
     try {
         $prep = $pdo -> prepare ($sql) ;
         $prep -> bindParam (1, $l_Condition, PDO::PARAM_STR);
@@ -36,7 +36,7 @@ function _pgSelect (string $s_Column, string $i_Table, string $w_Column, $l_Cond
     return (array) $fetch;
 }
 
-//функция INSERT
+//функция InsertUser
 function _pgInsertUser ( mixed $city_id,mixed $pdo){
     $sql = "INSERT INTO users(full_name, nick_name, email, birthdate, city_id) VALUES (?, ?, ?, ?, ?)";
     try {
@@ -44,7 +44,7 @@ function _pgInsertUser ( mixed $city_id,mixed $pdo){
         $prep -> bindParam (1,$_POST['name'] , PDO::PARAM_STR);
         $prep -> bindParam (2,$_POST['nick'] , PDO::PARAM_STR);
         $prep -> bindParam (3,$_POST['email'] , PDO::PARAM_STR);
-        $prep -> bindParam (4,$_POST['date'] , PDO::PARAM_STR);
+        $prep -> bindParam (4,$_POST['data'] , PDO::PARAM_STR);
         $prep -> bindParam (5,$city_id , PDO::PARAM_STR);
         $prep -> execute ();
     } catch (Exception $e){
@@ -53,6 +53,7 @@ function _pgInsertUser ( mixed $city_id,mixed $pdo){
     }
 }
 
+//функция InsertCity
 function _pgInsertCity (mixed $pdo){
     $sql = "INSERT INTO cities(city) VALUES (?)";
     try {
@@ -64,6 +65,8 @@ function _pgInsertCity (mixed $pdo){
         die;
     }
 }
+
+//функция проверки данных
 function _issetValue ($querry) {
     if (isset($querry['id'])){
         echo "Пользователь с такими данными уже существует";
