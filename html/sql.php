@@ -21,7 +21,7 @@ $dbc = new PDO($dsn, $user, $pass, $pdo_option);
 
 interface ValidateParams
 {
-    function _validateValue($querry);
+    function _validateValue($querry,$url);
 }
 
 class SQLUsers implements ValidateParams
@@ -38,7 +38,7 @@ class SQLUsers implements ValidateParams
         $this->email = $email;
     }
 
-    //функция Select
+    //функция select
     function _select(string $field, string $table, array $Condition, PDO $pdo): array
     {
         foreach ($Condition as $key => $value) {
@@ -69,6 +69,7 @@ class SQLUsers implements ValidateParams
         $prep->bindParam(4, $date, PDO::PARAM_STR);
         $prep->bindParam(5, $city_id, PDO::PARAM_STR);
         $prep->execute();
+        $prep = null;
     }
 
     //функция InsertCity
@@ -78,14 +79,17 @@ class SQLUsers implements ValidateParams
         $prep = $pdo->prepare($sql);
         $prep->bindParam(1, $city, PDO::PARAM_STR);
         $prep->execute();
+        $prep = null;
     }
 
-    function _validateValue($querry)
+    function _validateValue($querry,$url)
     {
         if (isset($querry['id'])) {
+            header("Refresh: 5, url=$url");
             echo "Пользователь с такими данными уже существует";
             die;
         } elseif (!isset($querry[0])) {
+            header("Refresh: 5, url=$url");
             echo "Вы ввели не все данные";
             die;
         }
@@ -93,17 +97,24 @@ class SQLUsers implements ValidateParams
 }
 
 if (isset($_POST)) {
-    $name = $_POST['name'];
-    $nick = $_POST['nick'];
-    $city = $_POST['city'];
-    $date = $_POST['data'];
-    $email = $_POST['email'];
+    $name = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['name']);
+    $nick = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['nick']);
+    $city = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['city']);
+    $date = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['data']);
+    $email = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['email']);
+    $header = 'http://testproject.local/';
 
     $user = new SQLUsers($name, $nick, $city, $date, $email);
-    $city_id = $user->_select('city', 'cities', ['city' => $city], $dbc);
-    if (isset($city_id[0])){
+    $city_id = $user->_select('id', 'cities', ['city' => $city], $dbc);
+    var_dump($city_id);
+    if (isset($city_id[0])) {
         $user->_insertCity($city, $dbc);
         $city_id = $user->_select('city', 'cities', ['city' => $city], $dbc);
+        var_dump($city_id);
     }
-    $user->_insertUser($name,$nick,$email,$date,$city_id['id'],$dbc);
+    $user->_insertUser($name, $nick, $email, $date, $city_id['id'], $dbc);
+    $dbc = null;
+    $header = 'http://testproject.local/';
+    header("Refresh: 5, url=$header");
+    echo "Регистрация прошла успешно";
 }
