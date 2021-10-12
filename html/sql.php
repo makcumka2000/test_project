@@ -12,6 +12,8 @@ $user = 'dxrist';
 $pass = '112233';
 $dsn = "pgsql: host=$host; port=$port; dbname=$db_name";
 $pdo_option = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
+$cityTable = ['cities', 'id', 'city'];
+$usersTable = ['users', 'id', 'full_name', 'nick_name', 'birthdate', 'email', 'city_id'];
 
 // подключение к базе
 
@@ -21,7 +23,7 @@ $dbc = new PDO($dsn, $user, $pass, $pdo_option);
 
 interface ValidateParams
 {
-    function _validateValue($querry,$url);
+    public function _validateValue($querry, $url);
 }
 
 class SQLUsers implements ValidateParams
@@ -39,21 +41,23 @@ class SQLUsers implements ValidateParams
     }
 
     //функция select
-    function _select(string $field, string $table, array $Condition, PDO $pdo): array
+    public function _select(string $field, string $table, string $key, string $value, array $white_array, PDO $pdo): array
     {
-        foreach ($Condition as $key => $value) {
+        $input = [$field, $table, $value, $key];
+        $white_list = array_intersect_key($white_array, $input);
+        if (count($white_list) >= 3) {
             $sql = "SELECT $field FROM $table WHERE $key = ? ";
             $prep = $pdo->prepare($sql);
             $prep->bindParam(1, $value, PDO::PARAM_STR);
             $prep->execute();
+            $fetch =  $prep->fetch(PDO::FETCH_ASSOC);
+            $prep = null;
+            return (array) $fetch;
         }
-        $fetch =  $prep->fetch(PDO::FETCH_ASSOC);
-        $prep = null;
-        return (array) $fetch;
     }
 
     //функция InsertUser
-    function _insertUser(
+    public function _insertUser(
         string $name,
         string $nick,
         string $email,
@@ -73,7 +77,7 @@ class SQLUsers implements ValidateParams
     }
 
     //функция InsertCity
-    function _insertCity(string $city, PDO $pdo)
+    public function _insertCity(string $city, PDO $pdo)
     {
         $sql = "INSERT INTO cities VALUES (?)";
         $prep = $pdo->prepare($sql);
@@ -82,7 +86,7 @@ class SQLUsers implements ValidateParams
         $prep = null;
     }
 
-    function _validateValue($querry,$url)
+    public function _validateValue($querry, $url)
     {
         if (isset($querry['id'])) {
             header("Refresh: 5, url=$url");
@@ -97,19 +101,18 @@ class SQLUsers implements ValidateParams
 }
 
 if (isset($_POST)) {
-    $name = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['name']);
-    $nick = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['nick']);
-    $city = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['city']);
-    $date = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['data']);
-    $email = preg_replace('/|;|:|!|@|%|&|)|_|(|>|</','',$_POST['email']);
+    $name = $_POST['name'];
+    $nick = $_POST['nick'];
+    $city = $_POST['city'];
+    $date = $_POST['data'];
+    $email = $_POST['email'];
     $header = 'http://testproject.local/';
 
     $user = new SQLUsers($name, $nick, $city, $date, $email);
-    $city_id = $user->_select('id', 'cities', ['city' => $city], $dbc);
-    var_dump($city_id);
+    $city_id = $user->_select('id','cities','city',$city,$cityTable,$dbc);
     if (isset($city_id[0])) {
         $user->_insertCity($city, $dbc);
-        $city_id = $user->_select('city', 'cities', ['city' => $city], $dbc);
+        $city_id = $user->_select('id', 'cities', 'city', $city, $cityTable,$dbc);
         var_dump($city_id);
     }
     $user->_insertUser($name, $nick, $email, $date, $city_id['id'], $dbc);
