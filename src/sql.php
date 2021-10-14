@@ -5,16 +5,17 @@ ini_set('display_startup_errors', 1);
 
 error_reporting(E_ALL);
 
-require __DIR__."/dbconnect.php";
-require __DIR__."/SQLUserStorage.php";
-require __DIR__."/SQLCityStorage.php";
+require_once __DIR__ . "/dbconnect.php";
+require_once __DIR__ . "/SQLUserStorage.php";
+require_once __DIR__ . "/SQLCityStorage.php";
 
-function validateData($data) {
+function validateData($data)
+{
     $data = trim($data);
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
     return $data;
-  }
+}
 
 if (isset($_POST)) {
     $name = validateData($_POST['name']);
@@ -24,15 +25,15 @@ if (isset($_POST)) {
     $email = validateData($_POST['email']);
     $header = 'http://testproject.local/';
 
-    
-    $newCity = new SQLCityStorage($city, $dbc);
-    $newCity->issetCity();
-    if ($newCity==false) {
-        $cityID = $newCity->insert();
+
+    $newCity = new SQLCityStorage($dbc);
+    $newCity->issetCity($city);
+    if ($newCity == false) {
+        $cityID = $newCity->insert($city);
     }
-    $cityID=$newCity->select();
-    $newUser = new SQLUserStorage($name, $nick, $cityID, $date, $email, $dbc);
-    $newUser->insert();
+    $cityID = $newCity->select($city);
+    $newUser = new SQLUserStorage($dbc);
+    $newUser->insert($name, $nick, $cityID, $date, $email);
     header("Refresh: 5, url=$header");
     echo "Регистрация прошла успешно";
 }

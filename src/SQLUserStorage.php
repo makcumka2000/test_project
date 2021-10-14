@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . "/interface.php";
+
 /** 
  * from $_POST
  *
@@ -12,11 +14,6 @@
  * @return id of last operation 
  **/
 
-interface UserStorageInteface
-{
-    public function insert();
-}
-
 class SQLUserStorage implements UserStorageInteface
 {
 
@@ -28,30 +25,26 @@ class SQLUserStorage implements UserStorageInteface
     public PDO $pdo;
 
     function __construct(
+        PDO $pdo
+    ) {
+        $this->pdo = $pdo;
+    }
+
+    public function insert(
         string $name,
         string $nick,
         int $city_id,
         string $date,
-        string $email,
-        PDO $pdo
-    ) {
-        $this->name = $name;
-        $this->nick = $nick;
-        $this->city_id = $city_id;
-        $this->date = $date;
-        $this->email = $email;
-        $this->pdo = $pdo;
-    }
-
-    public function insert(): int {
+        string $email
+    ): int {
         $sql = "INSERT INTO users(full_name, nick_name, email, birthdate, city_id)
          VALUES (?, ?, ?, ?, ?)";
         $prep = $this->pdo->prepare($sql);
-        $prep->bindParam(1, $this->name, PDO::PARAM_STR);
-        $prep->bindParam(2, $this->nick, PDO::PARAM_STR);
-        $prep->bindParam(3, $this->email, PDO::PARAM_STR);
-        $prep->bindParam(4, $this->date, PDO::PARAM_STR);
-        $prep->bindParam(5, $this->city_id, PDO::PARAM_STR);
+        $prep->bindParam(1, $name, PDO::PARAM_STR);
+        $prep->bindParam(2, $nick, PDO::PARAM_STR);
+        $prep->bindParam(3, $email, PDO::PARAM_STR);
+        $prep->bindParam(4, $date, PDO::PARAM_STR);
+        $prep->bindParam(5, $city_id, PDO::PARAM_STR);
         $prep->execute();
         return $this->pdo->lastInsertId();
     }

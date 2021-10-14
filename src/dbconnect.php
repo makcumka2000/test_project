@@ -8,6 +8,4 @@ $pass = '112233';
 $dsn = "pgsql: host=$host; port=$port; dbname=$db_name";
 $pdo_option = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
 
-// подключение к базе
-
 $dbc = new PDO($dsn, $user, $pass, $pdo_option);
