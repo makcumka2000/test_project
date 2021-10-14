@@ -12,7 +12,7 @@
                 <p>Это тело тестовой страницы</p>
             </div>
             <div>
-                <form name = "reg" method = "POST" action="sql.php"> 
+                <form name = "reg" method = "POST" action="/src/sql.php"> 
                     <p>Никнейм:<input type = "text" name = "nick"></P>
                     <p>ФИО:<input type = "text" name = "name"></P>
                     <p>email:<input type = "text" name = "email"></P>
