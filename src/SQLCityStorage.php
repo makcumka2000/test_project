@@ -29,6 +29,10 @@ class SQLCityStorage implements CityStorageInteface
         $prep->bindParam(1, $city, PDO::PARAM_STR);
         $prep->execute();
         $id = $prep->fetch(PDO::FETCH_ASSOC);
+        if (isset($id['id']) === false) {
+            throw new CityNotFoundException(printf('City "%s" doens not exists', $city));
+        }
+        
         return $id['id'];
     } 
     
@@ -44,15 +48,13 @@ class SQLCityStorage implements CityStorageInteface
 
     public function issetCity(string $city): bool
     {
-        $sql = "SELECT id FROM cities WHERE city = ?";
-        $prep = $this->pdo->prepare($sql);
-        $prep->bindParam(1, $city, PDO::PARAM_STR);
-        $prep->execute();
-        $id = $prep->fetch(PDO::FETCH_ASSOC);
-        if (isset($id['id'])) {
+       
+        try{
+            $this->select($city);
             return true;
+        }cathc(CityNotFoundException $ex){
+            return false;
         }
-        return false;
     }
 
 }
